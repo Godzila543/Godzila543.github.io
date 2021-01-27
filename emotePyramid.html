@@ -11,7 +11,7 @@
   <span>Optional Emote: </span><input type="text" id="emote4"><br>
   <span>Optional Emote: </span><input type="text" id="emote5"><br>
   <span>Height: </span><input type="range" min=1 max=8 id="height"><span id="heightSpan">5</span><br>
-  <span>Manual Padding: </span><input type="range" min=1 max=13 id="padding"><span id="paddingSpan">7</span><br>
+  <span>Manual Padding: </span><input type="range" value=7 min=1 max=18 id="padding"><span id="paddingSpan">7</span><br>
   <p id="pasta"></p>
   <input type="button" id="b2" value="Copy Pyramid to Clipboard">
   <script
@@ -56,8 +56,10 @@
           pasta += emotes[emoteIndex%emotes.length] + " "
           emoteIndex++
         }
-        for (let k = 0; k < 19 - 2*i; k++) {
-          pasta += "⠀";
+        if (i!=height-1) {
+          for (let k = 0; k < 19 - 2*i; k++) {
+            pasta += "⠀";
+          }
         }
       }
       return pasta;
