@@ -5,7 +5,9 @@
 </head>
 <body>
   <h1>Epic Style Pyramid Generator B)</h1>
-  <span>Emote Name: </span><input type="text" id="emote"><br>
+  <span>Emote Name: </span><input type="text" id="emote1"><br>
+  <span>Optional Second Emote: </span><input type="text" id="emote2"><br>
+  <p>Note: buttons will not use second emote</p>
   <p id="pasta"></p>
   <input type="button" id="b2" value="Copy 2 Height">
   <input type="button" id="b3" value="Copy 3 Height">
@@ -18,11 +20,8 @@
   crossorigin="anonymous"></script>
   <script>
     $(document).ready(function(){
-      $("#emote").change(function(){
-        var e = $("#emote").val();
-        var pasta = ` ⠀⠀⠀⠀ ⠀ ⠀ ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ${e} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ${e} ${e} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ${e} ${e} ${e} ${e}`;
-        $("#pasta").text(pasta);
-      });
+      $("#emote1").change(updateTextBlock);
+      $("#emote2").change(updateTextBlock);
       $("#b2").click(function(){
         var e = $("#emote").val();
         copyTextToClipboard(` ⠀⠀⠀⠀ ⠀ ⠀ ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e}`);
@@ -45,6 +44,18 @@
       });
     });
 
+    function updateTextBlock() {
+      var e = $("#emote1").val();
+      var a = $("#emote2").val();
+      
+      var pasta;
+      if (a=='') {
+        pasta = ` ⠀⠀⠀⠀ ⠀ ⠀ ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ${e} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ${e} ${e} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${e} ${e} ${e} ${e} ${e}`;
+      } else {
+        pasta = ` ⠀⠀⠀⠀ ⠀ ⠀ ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${a} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${a} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${a} ${e} ${a} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${a} ${e} ${a} ${e} ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀ ${e} ${a} ${e} ${a} ${e} ${a}`;
+      }
+      $("#pasta").text(pasta);
+    }
     function fallbackCopyTextToClipboard(text) {
       var textArea = document.createElement("textarea");
       textArea.value = text;
@@ -84,7 +95,7 @@
 </html>
 
 <style>
-  p {
+  #pasta {
     width: 350px;
     border-style: solid;
   }
