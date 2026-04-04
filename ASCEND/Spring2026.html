@@ -239,6 +239,13 @@
 				>
 					Wavelength color
 				</div>
+				<div
+					class="subtab"
+					id="st-residual"
+					onclick="switchSubtab('residual', this)"
+				>
+					Deviation
+				</div>
 			</div>
 
 			<div id="subpanel-inferno" class="subpanel active">
@@ -256,6 +263,17 @@
 				</div>
 				<div class="plot-container">
 					<div id="plt-spectro-wlcolor" style="height: 460px"></div>
+				</div>
+			</div>
+
+			<div id="subpanel-residual" class="subpanel">
+				<div class="legend-strip-labels" style="margin-top: 4px;">
+					<span>Below common-mode</span>
+					<span>Residual deviation</span>
+					<span>Above common-mode</span>
+				</div>
+				<div class="plot-container">
+					<div id="plt-spectro-residual" style="height: 460px"></div>
 				</div>
 			</div>
 		</div>
@@ -573,6 +591,80 @@
 				// Tighten y-axis so bands don't have huge gaps
 				ly.yaxis.range = [WL[0] - 30, WL[WL.length - 1] + 30];
 				Plotly.newPlot("plt-spectro-wlcolor", traces, ly, cfg());
+			}
+
+			function getNormalizedSpectralChannels() {
+				return WL.map((_, i) => {
+					const key = "Triple Spectral Sensor(" + LETTERS[i] + ")";
+					const raw = D.spectral[key];
+					const valid = raw.filter((v) => v !== null && !isNaN(v));
+					const p98 =
+						valid.slice().sort((a, b) => a - b)[
+							Math.floor(valid.length * 0.98)
+						] || 1;
+					return raw.map((v) =>
+						v === null || isNaN(v) ? null : Math.min(v / p98, 1.0),
+					);
+				});
+			}
+
+			function median(values) {
+				if (!values.length) return null;
+				const sorted = values.slice().sort((a, b) => a - b);
+				const mid = Math.floor(sorted.length / 2);
+				return sorted.length % 2 === 0
+					? (sorted[mid - 1] + sorted[mid]) / 2
+					: sorted[mid];
+			}
+
+			function drawSpectroResidual() {
+				const normalized = getNormalizedSpectralChannels();
+				const residuals = normalized.map((row) =>
+					row.map((value, timeIdx) => {
+						if (value === null || isNaN(value)) return null;
+						const common = median(
+							normalized
+								.map((channelRow) => channelRow[timeIdx])
+								.filter((v) => v !== null && !isNaN(v)),
+						);
+						return common === null ? null : value - common;
+					}),
+				);
+
+				const residualValues = residuals
+					.flat()
+					.filter((v) => v !== null && !isNaN(v));
+				const maxAbs = residualValues.length
+					? Math.max(...residualValues.map((v) => Math.abs(v)))
+					: 1;
+
+				const trace = {
+					x: T,
+					y: WL,
+					z: residuals,
+					type: "heatmap",
+					zsmooth: false,
+					xgap: 0,
+					ygap: 0,
+					colorscale: "RdBu",
+					zmid: 0,
+					zmin: -maxAbs,
+					zmax: maxAbs,
+					colorbar: {
+						title: {
+							text: "Residual",
+							font: { color: TEXT, size: 11 },
+						},
+						tickfont: { color: SUBTEXT },
+						len: 0.85,
+						x: 0.92,
+					},
+					hovertemplate:
+						"T: %{x:.0f}s<br>λ: %{y}nm<br>Residual: %{z:.3f}<extra></extra>",
+				};
+
+				const ly = spectroLayout("Spectral Radiance — Common-Mode Deviation");
+				Plotly.newPlot("plt-spectro-residual", [trace, altOverlayTrace()], ly, cfg());
 			}
 
 			// ---- Altitude panel ----
@@ -914,6 +1006,7 @@
 					drawnSubs[name] = true;
 					if (name === "inferno") drawSpectroInferno();
 					else if (name === "wlcolor") drawSpectroWL();
+					else if (name === "residual") drawSpectroResidual();
 				}
 			}
 
